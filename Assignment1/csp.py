@@ -731,6 +731,19 @@ for unit in map(set, _BOXES + _ROWS + _COLS):
         _NEIGHBORS[v].update(unit - {v})
 
 
+_R2 = list(range(2))
+_CELL2 = itertools.count().__next__
+_BGRID2 = [[[[_CELL2() for x in _R2] for y in _R2] for bx in _R2] for by in _R2]
+_BOXES2 = flatten([list(map(flatten, brow)) for brow in _BGRID2])
+_ROWS2 = flatten([list(map(flatten, zip(*brow))) for brow in _BGRID2])
+_COLS2 = list(zip(*_ROWS2))
+
+_NEIGHBORS2 = {v: set() for v in flatten(_ROWS2)}
+for unit in map(set, _BOXES2 + _ROWS2 + _COLS2):
+    for v in unit:
+        _NEIGHBORS2[v].update(unit - {v})
+
+
 class Sudoku(CSP):
     """A Sudoku problem.
     The box grid is a 3x3 array of boxes, each a 3x3 array of cells.
@@ -798,6 +811,45 @@ class Sudoku(CSP):
             '\n'.join(reduce(
                 abut, map(show_box, brow))) for brow in self.bgrid))
 
+
+class Sudoku2(CSP):
+    """A Sudoku problem.
+    The box grid is a 2x2 array of boxes, each a 2x2 array of cells.
+    Each cell holds a digit in 1..4. In each box, all digits are
+    different; the same for each row and column as a 2x2 grid.
+    True
+    """  # noqa
+
+    R2 = _R2
+    Cell = _CELL2
+    bgrid = _BGRID2
+    boxes = _BOXES2
+    rows = _ROWS2
+    cols = _COLS2
+    neighbors = _NEIGHBORS2
+
+    def __init__(self, grid):
+        """Build a Sudoku problem from a string representing the grid:
+        the digits 1-9 denote a filled cell, '.' or '0' an empty one;
+        other characters are ignored."""
+        squares = iter(re.findall(r'\d|\.', grid))
+        domains = {var: [ch] if ch in '1234' else '1234'
+                   for var, ch in zip(flatten(self.rows), squares)}
+        for _ in squares:
+            raise ValueError("Not a Sudoku grid", grid)  # Too many squares
+        CSP.__init__(self, None, domains, self.neighbors, different_values_constraint)
+
+    def display(self, assignment):
+        def show_box(box): return [' '.join(map(show_cell, row)) for row in box]
+
+        def show_cell(cell): return str(assignment.get(cell, '.'))
+
+        def abut(lines1, lines2): return list(
+            map(' | '.join, list(zip(lines1, lines2))))
+
+        print('\n------+-------+------\n'.join(
+            '\n'.join(reduce(
+                abut, map(show_box, brow))) for brow in self.bgrid))
 
 # ______________________________________________________________________________
 # The Zebra Puzzle

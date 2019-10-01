@@ -100,8 +100,8 @@ class CSP(search.Problem):
         else:
             assignment = dict(state)
             var = first([v for v in self.variables if v not in assignment])
-            return [(var, val) for val in self.domains[var]
-                    if self.nconflicts(var, val, assignment) == 0]
+            return [(var, val) for val in self.domains[var]]
+                    # if self.nconflicts(var, val, assignment) == 0]
 
     def result(self, state, action):
         """Perform an action and return the new state."""
@@ -830,7 +830,7 @@ class Sudoku2(CSP):
 
     def __init__(self, grid):
         """Build a Sudoku problem from a string representing the grid:
-        the digits 1-9 denote a filled cell, '.' or '0' an empty one;
+        the digits 1-4 denote a filled cell, '.' or '0' an empty one;
         other characters are ignored."""
         squares = iter(re.findall(r'\d|\.', grid))
         domains = {var: [ch] if ch in '1234' else '1234'
@@ -840,14 +840,16 @@ class Sudoku2(CSP):
         CSP.__init__(self, None, domains, self.neighbors, different_values_constraint)
 
     def display(self, assignment):
-        def show_box(box): return [' '.join(map(show_cell, row)) for row in box]
+        def show_box(box):
+            return [' '.join(map(show_cell, row)) for row in box]
 
-        def show_cell(cell): return str(assignment.get(cell, '.'))
+        def show_cell(cell):
+            return str(assignment.get(cell, '.'))
 
-        def abut(lines1, lines2): return list(
-            map(' | '.join, list(zip(lines1, lines2))))
+        def abut(lines1, lines2):
+            return list(map(' | '.join, list(zip(lines1, lines2))))
 
-        print('\n------+-------+------\n'.join(
+        return('\n------+-------+------\n'.join(
             '\n'.join(reduce(
                 abut, map(show_box, brow))) for brow in self.bgrid))
 

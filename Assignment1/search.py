@@ -15,6 +15,7 @@ import math
 import random
 import sys
 import bisect
+import time
 from operator import itemgetter
 
 
@@ -185,14 +186,19 @@ def breadth_first_tree_search(problem):
         Search through the successors of a problem to find a goal.
         The argument frontier should be an empty queue.
         Repeats infinitely in case of loops. [Figure 3.7]"""
-
+    nodesGenerated = 1
+    maxNodesStored = 0
     frontier = deque([Node(problem.initial)])  # FIFO queue
 
     while frontier:
         node = frontier.popleft()
         if problem.goal_test(node.state):
-            return node
-        frontier.extend(node.expand(problem))
+            return [node, nodesGenerated, maxNodesStored]
+        children = node.expand(problem)
+        nodesGenerated += children.__len__()
+        frontier.extend(children)
+        if frontier.__len__() > maxNodesStored:
+            maxNodesStored = frontier.__len__()
     return None
 
 
@@ -201,14 +207,19 @@ def depth_first_tree_search(problem):
         Search through the successors of a problem to find a goal.
         The argument frontier should be an empty queue.
         Repeats infinitely in case of loops. [Figure 3.7]"""
-
+    nodesGenerated = 1
+    maxNodesStored = 0
     frontier = [Node(problem.initial)]  # Stack
 
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
-            return node
-        frontier.extend(node.expand(problem))
+            return [node, nodesGenerated, maxNodesStored]
+        children = node.expand(problem)
+        nodesGenerated += children.__len__()
+        frontier.extend(children)
+        if frontier.__len__() > maxNodesStored:
+            maxNodesStored = frontier.__len__()
     return None
 
 

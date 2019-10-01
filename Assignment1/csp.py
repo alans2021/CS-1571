@@ -397,25 +397,27 @@ def backtracking_search(csp,
                         inference=no_inference):
     """[Figure 6.5]"""
 
-    def backtrack(assignment):
+    def backtrack(assignment, num):
         if len(assignment) == len(csp.variables):
-            return assignment
+            return assignment, num
         var = select_unassigned_variable(assignment, csp)
         for value in order_domain_values(var, assignment, csp):
+            num += 1
             if 0 == csp.nconflicts(var, value, assignment):
                 csp.assign(var, value, assignment)
                 removals = csp.suppose(var, value)
                 if inference(csp, var, value, assignment, removals):
-                    result = backtrack(assignment)
-                    if result is not None:
-                        return result
+                    result = backtrack(assignment, num)
+                    num = result[1]
+                    if result[0] is not None:
+                        return result[0], num
                 csp.restore(removals)
         csp.unassign(var, assignment)
-        return None
+        return None, num
 
-    result = backtrack({})
+    result, num = backtrack({}, 0)
     assert result is None or csp.goal_test(result)
-    return result
+    return result, num
 
 
 # ______________________________________________________________________________

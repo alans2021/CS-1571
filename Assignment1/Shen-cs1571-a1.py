@@ -1,4 +1,5 @@
 import search
+import csp
 from csp import Sudoku2
 import time
 
@@ -28,10 +29,21 @@ def sudokuSolver(grid):
     f.write("Nodes generated: " + str(info[1]) + "; Maximum nodes stored: " + str(info[2]) + "\n")
     f.write("Runtime: " + str(finaltime - inittime) + " seconds\n")
     f.write("\n")
-    f.close()
 
     print("Finished depth first search")
 
+    inittime = time.time()
+    result, num = csp.backtracking_search(sudoku)
+    finaltime = time.time()
+    solution = sudoku.display(dict(result))
+    f.write("Backtracking Algorithm Solution For " + grid + ":\n")
+    f.write(solution + "\n")
+    f.write("Assignments made: " + str(num) + "\n")
+    f.write("Runtime: " + str(finaltime - inittime) + " seconds\n")
+    f.write("\n")
+    f.close()
+
+    print("Finished backtracking search")
 
 if __name__ == '__main__':
     file = open("output.txt", "w")

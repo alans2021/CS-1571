@@ -4,7 +4,7 @@ from operator import eq, neg
 
 from sortedcontainers import SortedSet
 
-from utils import argmin_random_tie, count, first, extend
+from utils import argmin_random_tie, argmax_random_tie, count, first, extend
 import search
 
 from collections import defaultdict, Counter
@@ -341,6 +341,13 @@ def mrv(assignment, csp):
         key=lambda var: num_legal_values(csp, var, assignment))
 
 
+def maxrv(assignment, csp):
+    """Least constraining variable heuristic"""
+    return argmax_random_tie(
+        [v for v in csp.variables if v not in assignment],
+        key=lambda var: num_legal_values(csp, var, assignment))
+
+
 def num_legal_values(csp, var, assignment):
     if csp.curr_domains:
         return len(csp.curr_domains[var])
@@ -361,6 +368,12 @@ def lcv(var, assignment, csp):
     """Least-constraining-values heuristic."""
     return sorted(csp.choices(var),
                   key=lambda val: csp.nconflicts(var, val, assignment))
+
+
+def mcv(var, assignment, csp):
+    """Most-constraining-values heuristic"""
+    return sorted(csp.choices(var),
+                  key=lambda val: csp.nconflicts(var, val, assignment), reverse=True)
 
 
 # Inference
@@ -391,33 +404,43 @@ def mac(csp, var, value, assignment, removals, constraint_propagation=AC3b):
 # The search, proper
 
 
-def backtracking_search(csp,
+def backtracking_search(csp, algorithm,
                         select_unassigned_variable=first_unassigned_variable,
                         order_domain_values=unordered_domain_values,
                         inference=no_inference):
     """[Figure 6.5]"""
 
-    def backtrack(assignment, num):
+    def backtrack(assignment):
         if len(assignment) == len(csp.variables):
-            return assignment, num
+            return assignment
         var = select_unassigned_variable(assignment, csp)
         for value in order_domain_values(var, assignment, csp):
-            num += 1
             if 0 == csp.nconflicts(var, value, assignment):
                 csp.assign(var, value, assignment)
                 removals = csp.suppose(var, value)
                 if inference(csp, var, value, assignment, removals):
-                    result = backtrack(assignment, num)
-                    num = result[1]
-                    if result[0] is not None:
-                        return result[0], num
+                    result = backtrack(assignment)
+                    if result is not None:
+                        return result
                 csp.restore(removals)
         csp.unassign(var, assignment)
-        return None, num
+        return None
 
-    result, num = backtrack({}, 0)
+    if algorithm == "backtracking-ordered":
+        select_unassigned_variable = mrv
+        order_domain_values = lcv
+        inference = mac
+    elif algorithm == "backtracking-noOrdering":
+        inference = mac
+    elif algorithm == "backtracking-reverse":
+        select_unassigned_variable = maxrv
+        order_domain_values = mcv
+        inference = mac
+
+    csp.nassigns = 0
+    result = backtrack({})
     assert result is None or csp.goal_test(result)
-    return result, num
+    return result, csp.nassigns
 
 
 # ______________________________________________________________________________

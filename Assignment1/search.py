@@ -208,7 +208,7 @@ def depth_first_tree_search(problem):
         The argument frontier should be an empty queue.
         Repeats infinitely in case of loops. [Figure 3.7]"""
     nodesGenerated = 1
-    maxNodesStored = 0
+    maxNodesStored = 1
     frontier = [Node(problem.initial)]  # Stack
 
     while frontier:

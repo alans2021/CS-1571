@@ -372,8 +372,20 @@ def lcv(var, assignment, csp):
 
 def mcv(var, assignment, csp):
     """Most-constraining-values heuristic"""
-    return sorted(csp.choices(var),
-                  key=lambda val: csp.nconflicts(var, val, assignment), reverse=True)
+    possible_values = csp.choices(var)
+    conflict_arr = []
+    value_arr = []
+    for num in possible_values:
+        num_conflicts = csp.nconflicts(var, num, assignment)
+        i = 0
+        for i in range(0, len(conflict_arr)):
+            if num_conflicts >= conflict_arr[i]:
+                conflict_arr.insert(i, num_conflicts)
+                break
+        if i == len(conflict_arr):
+            conflict_arr.append(num_conflicts)
+        value_arr.insert(i, num)
+    return value_arr
 
 
 # Inference
@@ -396,7 +408,7 @@ def forward_checking(csp, var, value, assignment, removals):
     return True
 
 
-def mac(csp, var, value, assignment, removals, constraint_propagation=AC3b):
+def mac(csp, var, value, assignment, removals, constraint_propagation=AC3):
     """Maintain arc consistency."""
     return constraint_propagation(csp, {(X, var) for X in csp.neighbors[var]}, removals)
 
@@ -426,19 +438,43 @@ def backtracking_search(csp, algorithm,
         csp.unassign(var, assignment)
         return None
 
-    if algorithm == "backtracking-ordered":
+    def backtrack_reverse(assignment):
+        if len(assignment) == len(csp.variables):
+            return assignment
+        var = select_unassigned_variable(assignment, csp)
+        for value in order_domain_values(var, assignment, csp):
+            csp.assign(var, value, assignment)
+            removals = csp.suppose(var, value)
+            if inference(csp, var, value, assignment, removals):
+                result = backtrack(assignment)
+                if result is not None:
+                    return result
+            csp.restore(removals)
+        csp.unassign(var, assignment)
+        return None
+
+    if algorithm == ("backtracking-ordered" or "course-scheduling"):
         select_unassigned_variable = mrv
         order_domain_values = lcv
         inference = mac
     elif algorithm == "backtracking-noOrdering":
+        select_unassigned_variable = first_unassigned_variable
+        order_domain_values = unordered_domain_values
         inference = mac
     elif algorithm == "backtracking-reverse":
         select_unassigned_variable = maxrv
         order_domain_values = mcv
         inference = mac
+    else:
+        select_unassigned_variable = mrv
+        order_domain_values = lcv
+        inference = forward_checking
 
     csp.nassigns = 0
-    result = backtrack({})
+    if algorithm == "backtracking-reverse":
+        result = backtrack_reverse({})
+    else:
+        result = backtrack({})
     assert result is None or csp.goal_test(result)
     return result, csp.nassigns
 
@@ -874,9 +910,46 @@ class Sudoku2(CSP):
         def abut(lines1, lines2):
             return list(map(' | '.join, list(zip(lines1, lines2))))
 
-        return('\n------+-------+------\n'.join(
+        return ('\n------+-------+------\n'.join(
             '\n'.join(reduce(
                 abut, map(show_box, brow))) for brow in self.bgrid))
+
+
+class CourseScheduling(CSP):
+    """Course Scheduling Problem"""
+
+    def __init__(self, sections, times):
+        neighbors = self.getNeighbors(sections)
+
+        CSP.__init__(self, sections, UniversalDict(list(range(1, times + 1))),
+                     neighbors, different_values_constraint)
+
+    def display(self, assignment):
+        schedule = ""
+        for key in assignment:
+            time = assignment[key]
+            index = key.rfind('-')
+            key = key[:index]
+            schedule += key + "," + str(time) + ";\n"
+        return schedule
+
+    def getNeighbors(self, sections):
+        dictionary = dict()
+        for section in sections:
+            section_arr = section.split("-")
+            neighbors = set()
+            for others in sections:
+                if others != section:
+                    others_arr = others.split("-")
+                    if section_arr[0] == others_arr[0] or section_arr[1] == others_arr[1]:
+                        neighbors.add(others)
+                    elif section_arr[3] != "" and others_arr[3] != "":
+                        areas1 = section_arr[3].split(",")
+                        areas2 = others_arr[3].split(",")
+                        if len(set(areas1) & set(areas2)) > 0:
+                            neighbors.add(others)
+            dictionary[section] = neighbors
+        return dictionary
 
 # ______________________________________________________________________________
 # The Zebra Puzzle

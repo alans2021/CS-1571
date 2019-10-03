@@ -9,7 +9,7 @@ prev = None
 
 def sudokuSolver(grid, algorithm):
     sudoku = Sudoku2(grid)
-    f = open("program_output.txt", "a")
+    f = open("sudoku.txt", "a")
     global prev
     if prev != grid:
         prev = grid
@@ -91,19 +91,26 @@ def scheduleCourses(filename, slots):
                 string = course_code + "-" + prof + "-" + str(index) + "-" + areas
                 sections.append(string)
                 index += 1
-        print(course)
 
-    SchedulingCSP = CourseScheduling(sections, slots)
-    result, num = csp.backtracking_search(SchedulingCSP, "course-scheduling")
-    schedule = SchedulingCSP.display(result)
+    schedulingCSP = CourseScheduling(sections, slots)
+    result, num = csp.backtracking_search(schedulingCSP, "course-scheduling")
+    schedule = schedulingCSP.display(result)
     f = open("Course-Schedule.txt", "w")
-    f.write("Course Schedule assuming " + str(slots) + " time slots and mrv heuristic\n")
+    f.write("Course Schedule assuming " + str(slots) + " time slots with mrv heuristics and degree heuristic as "
+                                                       "tiebreaker\n")
     f.write(schedule + "\n")
+    f.write("\n")
+
+    # result, num = csp.backtracking_search(SchedulingCSP, "course-scheduling-degree")
+    # schedule = SchedulingCSP.display(result)
+    # f.write("Course Schedule assuming " + str(slots) + " time slots and degree heuristic\n")
+    # f.write(schedule + "\n")
+    # f.write("\n")
     f.close()
 
 
 if __name__ == '__main__':
-    # file = open("program_output.txt", "w")
+    # file = open("sudoku.txt", "w")
     # file.close()
     # file = "exampleSudokus-q1.txt"
     # algs = ["backtracking-ordered", "backtracking-noOrdering", "backtracking-reverse"]
@@ -115,7 +122,7 @@ if __name__ == '__main__':
     # test = csp.NQueensCSP(8)
     # test = csp.Sudoku2("...1.13..32.2... ")
     file = "partB-courseList-shortened.txt"
-    # slots = int(input("Enter number of time slots available"))
-    slots = 10
+    slots = int(input("Enter number of time slots available\n"))
+    # slots = 10
     scheduleCourses(file, slots)
     exit(0)

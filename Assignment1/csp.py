@@ -341,6 +341,31 @@ def mrv(assignment, csp):
         key=lambda var: num_legal_values(csp, var, assignment))
 
 
+def degree(assignment, csp):
+    """First does the minimum-remaining-values heuristic.
+        Then degree heuristic as a tiebreaker"""
+    arr = [v for v in csp.variables if v not in assignment]
+    arr = sorted(arr, key=lambda var: num_legal_values(csp, var, assignment))
+
+    prev = num_legal_values(csp, arr[0], assignment)
+    max_index = 1
+    for i in range(1, len(arr)):
+        curr = num_legal_values(csp, arr[i], assignment)
+        if curr != prev or i == len(arr) - 1:  # break out of loop if num_legal_values changes
+            max_index = i
+            break
+
+    maxVar = arr[0]
+    maxVal = len(csp.neighbors[maxVar])
+    for i in range(0, max_index):  # look for variable with most amount of neighbors
+        neighbor_set = csp.neighbors[arr[i]]
+        if len(neighbor_set) > maxVal:  # If amount of neighbors greater than current max
+            maxVar = arr[i]
+            maxVal = len(neighbor_set)
+
+    return maxVar
+
+
 def maxrv(assignment, csp):
     """Least constraining variable heuristic"""
     return argmax_random_tie(
@@ -453,7 +478,7 @@ def backtracking_search(csp, algorithm,
         csp.unassign(var, assignment)
         return None
 
-    if algorithm == ("backtracking-ordered" or "course-scheduling"):
+    if algorithm == "backtracking-ordered":
         select_unassigned_variable = mrv
         order_domain_values = lcv
         inference = mac
@@ -464,6 +489,10 @@ def backtracking_search(csp, algorithm,
     elif algorithm == "backtracking-reverse":
         select_unassigned_variable = maxrv
         order_domain_values = mcv
+        inference = mac
+    elif algorithm == "course-scheduling":
+        select_unassigned_variable = degree
+        order_domain_values = lcv
         inference = mac
     else:
         select_unassigned_variable = mrv
@@ -925,6 +954,8 @@ class CourseScheduling(CSP):
                      neighbors, different_values_constraint)
 
     def display(self, assignment):
+        if assignment is None:
+            return "No scheduling possible"
         schedule = ""
         for key in assignment:
             time = assignment[key]

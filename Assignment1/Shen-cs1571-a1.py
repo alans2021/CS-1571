@@ -1,5 +1,7 @@
+import sys
 import search
 import csp
+import math
 from csp import Sudoku2
 from csp import CourseScheduling
 import time
@@ -100,16 +102,67 @@ def scheduleCourses(filename, slots):
                                                        "tiebreaker\n")
     f.write(schedule + "\n")
     f.write("\n")
-
-    # result, num = csp.backtracking_search(SchedulingCSP, "course-scheduling-degree")
-    # schedule = SchedulingCSP.display(result)
-    # f.write("Course Schedule assuming " + str(slots) + " time slots and degree heuristic\n")
-    # f.write(schedule + "\n")
-    # f.write("\n")
     f.close()
 
 
+def findPath(start, end, algorithm):
+    # Average human walking speed is 3.1 mph
+    # Each degree of latitude is approx. 69 miles apart
+    # Each degree of longitude at Pittsburgh is approx. 52.468 miles apart
+    goal_index = 0
+    elevation_file = "partC-intersections.txt"
+    distance_file = "partC-distances.txt"
+    intersections = []
+    latitude = []
+    longitude = []
+    elevation = []
+    heuristics = dict()
+
+    lines = [line.rstrip('\n') for line in open(elevation_file)]
+    for line in lines:
+        intersect_info = line.split(",")
+        latitude.append(float(intersect_info[2]))
+        longitude.append(float(intersect_info[3]))
+        elevation.append(float(intersect_info[4]))
+        new_intersect = intersect_info[0] + "," + intersect_info[1]
+        intersections.append(new_intersect)
+        if new_intersect == end:
+            goal_index = len(intersections) - 1
+
+    for j in range(0, len(intersections)):
+        latDist = (latitude[j] - latitude[goal_index]) * 69
+        longDist = (longitude[j] - longitude[goal_index]) * 52.468
+        twoDimDist = math.sqrt(latDist**2 + longDist**2)
+        elevaDist = (elevation[j] - elevation[goal_index]) * 0.0006213712
+        totalDist = math.sqrt(twoDimDist**2 + elevaDist**2)
+        heuristics[intersections[j]] = totalDist
+
+    pittsburgh_map = dict()  # First create association of neighbors of each intersection
+    for intersect in intersections:
+        lines = [line.rstrip('\n') for line in open(distance_file)]
+        neighbors = dict()
+        for line in lines:
+            line_arr = line.split(",")
+            intersect1 = line_arr[0] + "," + line_arr[1]
+            intersect2 = line_arr[2] + "," + line_arr[3]
+            if intersect == intersect1:
+                neighbors[intersect2] = float(line_arr[4])
+            elif intersect == intersect2:
+                neighbors[intersect1] = float(line_arr[4])
+        pittsburgh_map[intersect] = neighbors
+    pittsburgh_graph = search.GraphProblem(start, end, pittsburgh_map)  # Create graph of pittsburgh
+    solution = search.astar_search(pittsburgh_graph, heuristics)
+    time = solution.path_cost / 3.1 * 60  # Time in minutes to travel that distance
+    output = "," + solution.state + "," + str(time)
+    while solution.parent is not None:
+        solution = solution.parent
+        output = "," + solution.state + output
+    print("Result of " + algorithm + " search from " + start + " to " + end + ":")
+    print(output[1:])
+
+
 if __name__ == '__main__':
+    # test = sys.argv
     # file = open("sudoku.txt", "w")
     # file.close()
     # file = "exampleSudokus-q1.txt"
@@ -119,10 +172,8 @@ if __name__ == '__main__':
     #     for j in range(0, 3):
     #         sudokuSolver(lines[i], algs[j])
 
-    # test = csp.NQueensCSP(8)
-    # test = csp.Sudoku2("...1.13..32.2... ")
-    file = "partB-courseList-shortened.txt"
-    slots = int(input("Enter number of time slots available\n"))
-    # slots = 10
-    scheduleCourses(file, slots)
+    # file = "partB-courseList-shortened.txt"
+    # slots = int(input("Enter number of time slots available\n"))
+    # scheduleCourses(file, slots)
+    findPath("Forbes,Bouquet", "Bigelow,Lytton", "idAstar")
     exit(0)

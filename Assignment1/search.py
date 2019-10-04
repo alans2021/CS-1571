@@ -289,7 +289,34 @@ def best_first_graph_search(problem, f):
                 if f(child) < frontier[child]:
                     del frontier[child]
                     frontier.append(child)
-    return None
+
+
+def iterative_best_first_graph_search(problem, f, threshold):
+    f = memoize(f, 'f')
+    node = Node(problem.initial)
+    frontier = PriorityQueue('min', f)
+    frontier.append(node)
+    explored = set()
+    nextThreshold = []
+    while frontier:
+        node = frontier.pop()
+        if problem.goal_test(node.state):
+            return node
+        explored.add(node.state)
+        if f(node) <= threshold:
+            for child in node.expand(problem):
+                if child.state not in explored and child not in frontier:
+                    frontier.append(child)
+                elif child in frontier:
+                    if f(child) < frontier[child]:
+                        del frontier[child]
+                        frontier.append(child)
+        else:
+            nextThreshold.append(f(node))
+    if len(explored) == len(problem.graph):
+        return None
+    else:
+        return min(nextThreshold)
 
 
 def uniform_cost_search(problem):
@@ -418,8 +445,19 @@ def astar_search(problem, h=None):
     else in your Problem subclass."""
     return best_first_graph_search(problem, lambda n: n.path_cost + h[n.state])
 
+
+def id_astar_search(problem, h):
+    start = Node(problem.initial)
+    firstThreshold = start.path_cost + h[start.state]
+    search_result = iterative_best_first_graph_search(problem, lambda n: n.path_cost + h[n.state], firstThreshold)
+
+    while type(search_result) is float:  # Solution hasn't been found, so just returns next threshold
+        search_result = iterative_best_first_graph_search(problem,
+                                                          lambda n: n.path_cost + h[n.state], search_result)
+    return search_result
 # ______________________________________________________________________________
 # A* heuristics 
+
 
 class EightPuzzle(Problem):
 

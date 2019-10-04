@@ -109,7 +109,8 @@ def findPath(start, end, algorithm):
     # Average human walking speed is 3.1 mph
     # Each degree of latitude is approx. 69 miles apart
     # Each degree of longitude at Pittsburgh is approx. 52.468 miles apart
-    goal_index = 0
+    start_index = -1
+    goal_index = -1
     elevation_file = "partC-intersections.txt"
     distance_file = "partC-distances.txt"
     intersections = []
@@ -128,7 +129,12 @@ def findPath(start, end, algorithm):
         intersections.append(new_intersect)
         if new_intersect == end:
             goal_index = len(intersections) - 1
+        if new_intersect == start:
+            start_index = len(intersections) - 1
 
+    if goal_index == -1 or start_index == -1:  # Means end intersection doesn't exist
+        print("Intersection doesn't exist")
+        return
     for j in range(0, len(intersections)):
         latDist = (latitude[j] - latitude[goal_index]) * 69
         longDist = (longitude[j] - longitude[goal_index]) * 52.468
@@ -151,7 +157,11 @@ def findPath(start, end, algorithm):
                 neighbors[intersect1] = float(line_arr[4])
         pittsburgh_map[intersect] = neighbors
     pittsburgh_graph = search.GraphProblem(start, end, pittsburgh_map)  # Create graph of pittsburgh
-    solution = search.astar_search(pittsburgh_graph, heuristics)
+
+    if algorithm == "Astar":
+        solution = search.astar_search(pittsburgh_graph, heuristics)
+    else:
+        solution = search.id_astar_search(pittsburgh_graph, heuristics)
     time = solution.path_cost / 3.1 * 60  # Time in minutes to travel that distance
     output = "," + solution.state + "," + str(time)
     while solution.parent is not None:
@@ -176,4 +186,5 @@ if __name__ == '__main__':
     # slots = int(input("Enter number of time slots available\n"))
     # scheduleCourses(file, slots)
     findPath("Forbes,Bouquet", "Bigelow,Lytton", "idAstar")
+    findPath("Forbes,Bouquet", "Bigelow,Lytton", "Astar")
     exit(0)

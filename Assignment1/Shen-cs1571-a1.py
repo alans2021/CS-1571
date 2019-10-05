@@ -103,7 +103,7 @@ def scheduleCourses(filename, slots):
     f.write(schedule + "\n")
     f.write("\n")
     f.close()
-
+    print("Course Scheduling finished")
 
 def findPath(start, end, algorithm):
     # Average human walking speed is 3.1 mph
@@ -172,19 +172,22 @@ def findPath(start, end, algorithm):
 
 
 if __name__ == '__main__':
-    # test = sys.argv
-    # file = open("sudoku.txt", "w")
-    # file.close()
-    # file = "exampleSudokus-q1.txt"
-    # algs = ["backtracking-ordered", "backtracking-noOrdering", "backtracking-reverse"]
-    # lines = [line.rstrip('\n') for line in open(file)]
-    # for i in range(0, len(lines)):
-    #     for j in range(0, 3):
-    #         sudokuSolver(lines[i], algs[j])
+    if len(sys.argv) != 6:
+        print("Need 5 command line arguments to run")
+        print("Format should be <sudoku_grid_file> <courses_file> <num_time_slots> <intersection1> <intersection2>")
+        exit(1)
 
-    # file = "partB-courseList-shortened.txt"
-    # slots = int(input("Enter number of time slots available\n"))
-    # scheduleCourses(file, slots)
-    findPath("Forbes,Bouquet", "Bigelow,Lytton", "idAstar")
-    findPath("Forbes,Bouquet", "Bigelow,Lytton", "Astar")
+    file = open("sudoku.txt", "w")
+    file.close()
+    file = sys.argv[1]
+    algs = ["backtracking-ordered", "backtracking-noOrdering", "backtracking-reverse"]
+    lines = [line.rstrip('\n') for line in open(file)]
+    for i in range(0, len(lines)):
+        for j in range(0, 3):
+            sudokuSolver(lines[i], algs[j])
+
+    scheduleCourses(sys.argv[2], int(sys.argv[3]))
+
+    findPath(sys.argv[4], sys.argv[5], "idAstar")
+    findPath(sys.argv[4], sys.argv[5], "Astar")
     exit(0)

@@ -11,10 +11,9 @@ prev = None
 
 def sudokuSolver(grid, algorithm):
     sudoku = Sudoku2(grid)
-    f = open("sudoku.txt", "a")
-    global prev
-    if prev != grid:
-        prev = grid
+    f = open("sudoku.txt", "w")
+
+    if algorithm == "bfs":
         inittime = time.time()
         info = search.breadth_first_tree_search(sudoku)
         finaltime = time.time()
@@ -27,6 +26,7 @@ def sudokuSolver(grid, algorithm):
 
         print("Finished breadth first search")
 
+    elif algorithm == "dfs":
         inittime = time.time()
         info = search.depth_first_tree_search(sudoku)
         info[2] = info[2] + grid.count('.')
@@ -40,6 +40,7 @@ def sudokuSolver(grid, algorithm):
 
         print("Finished depth first search")
 
+    elif algorithm == "backtracking":
         inittime = time.time()
         result, num = csp.backtracking_search(sudoku, None)
         finaltime = time.time()
@@ -52,19 +53,21 @@ def sudokuSolver(grid, algorithm):
 
         print("Finished regular backtracking search")
 
-    inittime = time.time()
-    result, num = csp.backtracking_search(sudoku, algorithm)
-    finaltime = time.time()
-    solution = sudoku.display(dict(result))
-    print(str(finaltime) + " " + str(inittime))
-    f.write(algorithm + " Algorithm Solution For " + grid + ":\n")
-    f.write(solution + "\n")
-    f.write("Assignments made: " + str(num) + "\n")
-    f.write("Runtime: " + str(finaltime - inittime) + " seconds\n")
-    f.write("\n")
-    f.close()
+    elif algorithm == "backtracking-ordered" or algorithm == "backtracking-noOrdering" or \
+            algorithm == "backtracking-reverse":
+        inittime = time.time()
+        result, num = csp.backtracking_search(sudoku, algorithm)
+        finaltime = time.time()
+        solution = sudoku.display(dict(result))
+        print(str(finaltime) + " " + str(inittime))
+        f.write(algorithm + " Algorithm Solution For " + grid + ":\n")
+        f.write(solution + "\n")
+        f.write("Assignments made: " + str(num) + "\n")
+        f.write("Runtime: " + str(finaltime - inittime) + " seconds\n")
+        f.write("\n")
+        f.close()
 
-    print("Finished " + algorithm)
+        print("Finished " + algorithm)
 
 
 def scheduleCourses(filename, slots):
@@ -177,14 +180,11 @@ if __name__ == '__main__':
         print("Format should be <sudoku_grid_file> <courses_file> <num_time_slots> <intersection1> <intersection2>")
         exit(1)
 
-    file = open("sudoku.txt", "w")
-    file.close()
     file = sys.argv[1]
     algs = ["backtracking-ordered", "backtracking-noOrdering", "backtracking-reverse"]
     lines = [line.rstrip('\n') for line in open(file)]
-    for i in range(0, len(lines)):
-        for j in range(0, 3):
-            sudokuSolver(lines[i], algs[j])
+    for i in range(1, 2):
+        sudokuSolver(lines[i], "dfs")
 
     scheduleCourses(sys.argv[2], int(sys.argv[3]))
 

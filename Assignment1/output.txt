@@ -1,0 +1,81 @@
+BFS Algorithm Solution For ...1.13..32.2... :
+3 2 | 4 1
+4 1 | 3 2
+------+-------+------
+1 3 | 2 4
+2 4 | 1 3
+Nodes generated: 1423253; Maximum nodes stored: 1048576
+Runtime: 22.866655826568604 seconds
+
+DFS Algorithm Solution For ...1.13..32.2... :
+3 2 | 4 1
+4 1 | 3 2
+------+-------+------
+1 3 | 2 4
+2 4 | 1 3
+Nodes generated: 537589; Maximum nodes stored: 31
+Runtime: 15.084882736206055 seconds
+
+Backtracking Algorithm Solution For ...1.13..32.2... :
+3 2 | 4 1
+4 1 | 3 2
+------+-------+------
+1 3 | 2 4
+2 4 | 1 3
+Assignments made: 66
+Runtime: 0.0 seconds
+
+BFS Algorithm Solution For 4.2.2.3..4...24.:
+4 3 | 2 1
+2 1 | 3 4
+------+-------+------
+3 4 | 1 2
+1 2 | 4 3
+Nodes generated: 481706; Maximum nodes stored: 262144
+Runtime: 8.435104608535767 seconds
+
+DFS Algorithm Solution For 4.2.2.3..4...24.:
+4 3 | 2 1
+2 1 | 3 4
+------+-------+------
+3 4 | 1 2
+1 2 | 4 3
+Nodes generated: 234250; Maximum nodes stored: 28
+Runtime: 5.014648914337158 seconds
+
+Backtracking Algorithm Solution For 4.2.2.3..4...24.:
+4 3 | 2 1
+2 1 | 3 4
+------+-------+------
+3 4 | 1 2
+1 2 | 4 3
+Assignments made: 24
+Runtime: 0.0054628849029541016 seconds
+
+BFS Algorithm Solution For .3..4..32.313.2.:
+1 3 | 4 2
+4 2 | 1 3
+------+-------+------
+2 4 | 3 1
+3 1 | 2 4
+Nodes generated: 118169; Maximum nodes stored: 65536
+Runtime: 1.678551435470581 seconds
+
+DFS Algorithm Solution For .3..4..32.313.2.:
+1 3 | 4 2
+4 2 | 1 3
+------+-------+------
+2 4 | 3 1
+3 1 | 2 4
+Nodes generated: 93631; Maximum nodes stored: 25
+Runtime: 2.0024938583374023 seconds
+
+Backtracking Algorithm Solution For .3..4..32.313.2.:
+1 3 | 4 2
+4 2 | 1 3
+------+-------+------
+2 4 | 3 1
+3 1 | 2 4
+Assignments made: 32
+Runtime: 0.0009965896606445312 seconds
+

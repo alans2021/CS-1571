@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import logic
+import planning
+from utils import (remove_all, unique, first, argmax, probability, isnumber,
+                   issequence, Expr, expr, subexpressions, extend)
 
 """ A2 Part A
 
@@ -13,20 +16,50 @@
     
     Feel free to refactor the code to move M1 through M8 into a class, but the function call and return values should remain as specified below for our grading.
 """
+C = expr("CorrectAnswer")
+M = expr("MasteredSkill")
+B = expr("IsBored")
+CS = expr("CorrectStreak")
+IS = expr("IncorrectStreak")
+N = expr("NewSkill")
+E = expr("NeedsEncouragement")
 
-M1='Correct. Keep up the good work!'
-M2='Correct. I think you’re getting it!'
-M3='Correct. After this problem we can switch to a new problem.'
-M4='Incorrect. Keep trying and I’m sure you’ll get it!'
-M5='Incorrect. After this problem, we can switch to a new activity.'
-M6='Incorrect. The following is the correct answer to the problem.'
-M7='Correct.'
-M8='Incorrect.'
-  
+
+M1 = 'Correct. Keep up the good work!'
+M2 = 'Correct. I think you’re getting it!'
+M3 = 'Correct. After this problem we can switch to a new problem.'
+M4 = 'Incorrect. Keep trying and I’m sure you’ll get it!'
+M5 = 'Incorrect. After this problem, we can switch to a new activity.'
+M6 = 'Incorrect. The following is the correct answer to the problem.'
+M7 = 'Correct.'
+M8 = 'Incorrect.'
+dictionary = {1: M1, 2: M2, 3: M3, 4: M4, 5: M5, 6: M6, 7: M7, 8: M8}
+
+
 def giveFeedback(studentState):
-    feedbackMessage = M1
-    return feedbackMessage
- 
+    # Add the rules of feedback system
+    feedbackkb = logic.PropKB()
+    feedbackkb.tell(C | '==>' | (expr('M1') | expr('M2') | expr('M3') | expr('M7')))
+    feedbackkb.tell(~C | '==>' | (expr('M4') | expr('M5') | expr('M6') | expr('M8')))
+    feedbackkb.tell(((M & ~C) | (M & CS)) | '==>' | B)
+    feedbackkb.tell((N | IS) | '==>' | expr('M6'))
+    feedbackkb.tell(((IS & ~C) | (N & CS)) | '==>' | E)
+    feedbackkb.tell(E | '==>' | (expr('M2') | expr('M4')))
+    feedbackkb.tell(B | '==>' | (expr('M3') | expr('M5')))
+    feedbackkb.tell(((N & C) | CS) | '==>' | expr('M1'))
+
+    # Add student state
+    feedbackkb.tell(studentState)
+
+    # Iteratively Add ~M1, ~M2, .... ~M8 to knowledge base whenever a resolution returns false
+    for i in range(1, 9):
+        msg = 'M' + str(i)
+        if logic.pl_resolution(feedbackkb, expr(msg)):
+            return dictionary[i]
+        feedbackkb.tell(expr('~' + msg))
+
+    return None
+
     
 """ A2 Part B
 
@@ -94,10 +127,22 @@ EQUATION = '3x+2=8'
 ACTION = 'add -2'
 UPDATED_SKILLS = ['S8','S9','S4']
 
+
 def stepThroughProblem(equation, action, current_skills):
     feedback_message = M1
     updated_skills = UPDATED_SKILLS
     return [feedback_message,updated_skills]
+
+
+if __name__ == '__main__':
+    feedback = giveFeedback("~CorrectAnswer & MasteredSkill")
+    print(feedback)
+    feedback = giveFeedback("CorrectStreak & MasteredSkill")
+    print(feedback)
+    feedback = giveFeedback("IncorrectStreak")
+    print(feedback)
+    feedback = giveFeedback("CorrectStreak & CorrectAnswer & NewSkill")
+    print(feedback)
                                 
                              
 

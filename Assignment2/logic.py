@@ -106,7 +106,8 @@ class PropKB(KB):
         for c in conjuncts(to_cnf(sentence)):
             if c in self.clauses:
                 self.clauses.remove(c)
-
+                return c
+        return None
 
 # ______________________________________________________________________________
 

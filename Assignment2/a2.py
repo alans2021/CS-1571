@@ -43,7 +43,7 @@ def giveFeedback(studentState):
     feedbackkb.tell(~C | '==>' | (expr('M4') | expr('M5') | expr('M6') | expr('M8')))
     feedbackkb.tell(((M & ~C) | (M & CS)) | '==>' | B)
     feedbackkb.tell((N | IS) | '==>' | expr('M6'))
-    feedbackkb.tell(((IS & ~C) | (N & CS)) | '==>' | E)
+    feedbackkb.tell(((IS & C) | (N & CS)) | '==>' | E)
     feedbackkb.tell(E | '==>' | (expr('M2') | expr('M4')))
     feedbackkb.tell(B | '==>' | (expr('M3') | expr('M5')))
     feedbackkb.tell(((N & C) | CS) | '==>' | expr('M1'))
@@ -54,9 +54,14 @@ def giveFeedback(studentState):
     # Iteratively Add ~M1, ~M2, .... ~M8 to knowledge base whenever a resolution returns false
     for i in range(1, 9):
         msg = 'M' + str(i)
-        if logic.pl_resolution(feedbackkb, expr(msg)):
+        if i == 2:
+            feedbackkb.tell(expr('~M4'))
+        if logic.pl_resolution(feedbackkb, expr(msg)):  # If entailment happens, return that message
             return dictionary[i]
-        feedbackkb.tell(expr('~' + msg))
+
+        if i == 2:
+            feedbackkb.retract(expr('~M4'))
+        feedbackkb.tell(expr('~' + msg))  # Can add to knowledge base since we know can't be this particular msg
 
     return None
 
@@ -75,6 +80,26 @@ def giveFeedback(studentState):
 """
 SAMPLE_EQUATION = '3x-2=6'
 SAMPLE_ACTION_PLAN = ['add 2', 'combine RHS constant terms', 'divide 3']
+
+def s1(coeff):
+    return "add " + str(coeff) + "x"
+def s2(coeff):
+    return "add -" + str(coeff) + "x"
+def s3(const):
+    return "add " + const
+def s4(const):
+    return "add -" + const
+def s5(const):
+    return "divide " + const
+def s6(const):
+    return "divide -" + const
+def s7():
+    return "combine RHS variable terms and get positive"
+def s8():
+    return "combine LHS variable terms and get positive"
+def s9():
+    return "combine LHS constant terms"
+
 
 def solveEquation(equation):
     plan = SAMPLE_ACTION_PLAN
@@ -135,6 +160,14 @@ def stepThroughProblem(equation, action, current_skills):
 
 
 if __name__ == '__main__':
+    feedback = giveFeedback("CorrectAnswer")
+    print(feedback)
+    feedback = giveFeedback("~CorrectAnswer")
+    print(feedback)
+    feedback = giveFeedback("CorrectAnswer & IncorrectStreak")
+    print(feedback)
+    feedback = giveFeedback("CorrectAnswer & CorrectStreak")
+    print(feedback)
     feedback = giveFeedback("~CorrectAnswer & MasteredSkill")
     print(feedback)
     feedback = giveFeedback("CorrectStreak & MasteredSkill")

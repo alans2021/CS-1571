@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+import sys
 import logic
 import planning
 import search
@@ -87,10 +89,10 @@ action1 = planning.Action('CombineLeftConstants(a, b)',
                             effect='~LHC(b)')
 action2 = planning.Action('CombineRightConstants(a, b)',
                             precond='RHC(a) & RHC(b)',
-                            effect='~RHC(a) & ~RHC(b) & RHC(-99999)')
+                            effect='~RHC(a) & ~RHC(b) & RHC({0})'.format(-sys.maxsize))
 action3 = planning.Action('CombineLeftVariables(a, b)',
                             precond='LHV(a) & LHV(b)',
-                            effect='~LHV(a) & ~LHV(b) & LHV(-99999)')
+                            effect='~LHV(a) & ~LHV(b) & LHV({0})'.format(-sys.maxsize))
 action4 = planning.Action('CombineRightVariables(a, b)',
                             precond='RHV(a) & RHV(b)',
                             effect='~RHV(a)')
@@ -101,8 +103,8 @@ action6 = planning.Action('AddConstant(a)',
                             precond='LHC(a)',
                             effect='~LHC(a) & RHC(a)')
 action7 = planning.Action('Divide()',
-                            precond='LHV(-99999) & RHC(-99999)',
-                            effect='LHV(1) & ~LHV(-99999)')
+                            precond='LHV({0}) & RHC({0})'.format(-sys.maxsize),
+                            effect='LHV({1}) & ~LHV({0}) & RHC({1}) & ~RHC({0})'.format(-sys.maxsize, -sys.maxsize - 1))
 
 
 def solveEquation(equation):
@@ -146,17 +148,82 @@ def solveEquation(equation):
         initial += 'RHC(0) & '
     initial = initial[: len(initial) - 3]
 
-    goal = 'LHV(1) & RHC(-99999)'    # Specifiying goal state
+    goal = 'LHV({0}) & RHC({0})'.format(-sys.maxsize - 1)    # Specifying goal state
     actions = [action1, action2, action3, action4, action5, action6, action7]
 
     problem = planning.PlanningProblem(initial, goal, actions)
     forward_planning = planning.ForwardPlan(problem)
     plan = search.astar_search(forward_planning)
-    return plan
 
-   
- 
-    
+    action_plan = []
+    while plan.parent is not None:
+        step = plan.action
+        if 0 not in step.args:
+            action_plan.insert(0, plan.action)
+        plan = plan.parent
+
+    action_plan = parseActionPlan(action_plan, initial)
+
+    return action_plan
+
+
+def parseActionPlan(action_plan, vars):
+    interLeftC = 0
+    interLeftV = 0
+    interRightC = 0
+    interRightV = 0
+    for i in range(0, len(action_plan)):
+        action = action_plan[i]
+        if action.name == 'AddConstant':
+            if interLeftC == 0:
+                interRightC = -1 * action.args[0]
+            else:
+                interRightC = -1 * interLeftC
+            interLeftC = 0
+            action_plan[i] = 'add ' + str(interRightC)
+        elif action.name == 'AddVariable':
+            if interRightV == 0:
+                interLeftV = -1 * action.args[0]
+            else:
+                interLeftV = -1 * interRightV
+            interRightV = 0
+            action_plan[i] = 'add ' + str(interLeftV) + 'x'
+        elif action.name == 'CombineRightConstants':
+            action_plan[i] = 'Combine RHS constants'
+            interRightC += action.args[0] + action.args[1]
+        elif action.name == 'CombineLeftConstants':
+            action_plan[i] = 'Combine LHS constants'
+            interLeftC += action.args[0] + action.args[1]
+        elif action.name == 'CombineRightVariables':
+            action_plan[i] = 'Combine RHS constants'
+            interRightV += action.args[0] + action.args[1]
+        elif action.name == 'CombineLeftVariables':
+            action_plan[i] = 'Combine LHS constants'
+            interLeftV += action.args[0] + action.args[1]
+        else:
+            left = [m.start() for m in re.finditer('LHV', vars)]
+            right = [m.start() for m in re.finditer('RHV', vars)]
+            coeff = 0
+            for index in left:
+                index = index + 4
+                try:
+                    coeff += int(vars[index: index + 1])
+                except ValueError:
+                    coeff += int(vars[index: index + 2])
+            for index in right:
+                index = index + 4
+                try:
+                    coeff += -1 * int(vars[index: index + 1])
+                except ValueError:
+                    coeff += -1 * int(vars[index: index + 2])
+            if coeff == 1:
+                del action_plan[i]
+            else:
+                action_plan[i] = 'divide ' + str(coeff)
+
+    return action_plan
+
+
 """ A2 Part C
 
     predictSuccess is a function that takes in a list of skills students have and an equation to be solved, and returns the skills
@@ -212,11 +279,34 @@ if __name__ == '__main__':
     # feedback = giveFeedback("CorrectAnswer")
     # print(feedback)
     # eqn = solveEquation('x=2')
+    # print(eqn)
     # eqn = solveEquation('-3x=6')
+    # print(eqn)
     # eqn = solveEquation('3x-2=-6')
-    # eqn = solveEquation('3x+x=-6x-4')
-    eqn = solveEquation('4+3=6x-7x')
-    print('test')
+    # print(eqn)
+
+    eqn = solveEquation('3x+x=-6x-4')
+    print(eqn)
+    eqn = solveEquation('2x+3=2+4')
+    print(eqn)
+
+    # eqn = solveEquation('2=x')
+    # print(eqn)
+    # eqn = solveEquation('6=-3x')
+    # print(eqn)
+    # eqn = solveEquation('-6=3x-2')
+    # print(eqn)
+    # eqn = solveEquation('-6x-4=3x+x')
+    # print(eqn)
+    # eqn = solveEquation('2+4=2x+3')
+    # print(eqn)
+    # eqn = solveEquation('x+2x=2+4')
+    # print(eqn)
+    # eqn = solveEquation('x+2=2x+4')
+    # print(eqn)
+    # eqn = solveEquation('2+4=x+2x')
+    # print(eqn)
+
                                 
                              
 

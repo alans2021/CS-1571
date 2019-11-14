@@ -256,11 +256,56 @@ CURRENT_SKILLS = ['S8','S9']
 EQUATION = '3x+2=8'
 SAMPLE_MISSING_SKILLS = ['S4','S5']
 
-def predictSuccess(current_skills, equation):
-    missing_skills = SAMPLE_MISSING_SKILLS
-    return missing_skills
 
-   
+def predictSuccess(current_skills, equation):
+    plan = solveEquation(equation)
+    
+    KnownKB = logic.FolKB()   # Create FOL knowledge base
+    NeedKB = logic.FolKB()  # Create FOL knowledge base
+    for skill in current_skills:
+        KnownKB.tell(expr(skill + '(x)'))
+    getNeededSkills(plan, NeedKB)
+
+    for i in range(len(NeedKB.clauses) - 1, -1, -1):
+        new_skill = NeedKB.clauses[i]
+        for skill in KnownKB.clauses:
+            if logic.unify(new_skill, skill) is not None:
+                NeedKB.retract(new_skill)
+    missing_skills = set()
+    for clause in NeedKB.clauses:
+        missing_skills.add(clause.op)
+    return list(missing_skills)
+
+
+def getNeededSkills(plan, NeedKB):  # Add clauses to NeedKB
+    sidesDict = {'LHS': '0', 'RHS': '1'}
+    for p in plan:
+        if p.find('add') != -1:
+            if p.find('x') == -1:
+                if p.find('-') != -1:
+                    NeedKB.tell(expr('S4(' + p[len(p) - 1:] + ')'))
+                else:
+                    NeedKB.tell(expr('S3(' + p[len(p) - 1:] + ')'))
+            else:
+                if p.find('-') != -1:
+                    NeedKB.tell(expr('S2(' + p[len(p) - 2:len(p) - 1] + ')'))
+                else:
+                    NeedKB.tell(expr('S1(' + p[len(p) - 2:len(p) - 1] + ')'))
+        elif p.find('Combine') != -1:
+            if p.find('variable') != -1:
+                if p.find('positive') != -1:
+                    NeedKB.tell(expr('S7(' + sidesDict[p[8:11]] + ')'))
+                else:
+                    NeedKB.tell(expr('S8(' + sidesDict[p[8:11]] + ')'))
+            else:
+                NeedKB.tell(expr('S9(' + sidesDict[p[8:11]] + ')'))
+        else:
+            if p.find('-') != -1:
+                NeedKB.tell(expr('S6(' + p[len(p) - 1:] + ')'))
+            else:
+                NeedKB.tell(expr('S5(' + p[len(p) - 1:] + ')'))
+
+
 """ A2 Part D
 
     stepThroughProblem is a function that takes a problem, a student action, and a list of current student skills, and returns
@@ -292,32 +337,57 @@ def stepThroughProblem(equation, action, current_skills):
 if __name__ == '__main__':
     # feedback = giveFeedback("CorrectAnswer")
     # print(feedback)
-    eqn = solveEquation('x=2')
+    # eqn = solveEquation('x=2')
+    # print(eqn)
+    # eqn = solveEquation('-3x=6')
+    # print(eqn)
+    # eqn = solveEquation('3x-2=-6')
+    # print(eqn)
+    # eqn = solveEquation('3x+x=-6x-4')
+    # print(eqn)
+    # eqn = solveEquation('2x+3=2+4')
+    # print(eqn)
+    # eqn = solveEquation('2=x')
+    # print(eqn)
+    # eqn = solveEquation('6=-3x')
+    # print(eqn)
+    # eqn = solveEquation('-6=3x-2')
+    # print(eqn)
+    # eqn = solveEquation('x+2x=2+4')
+    # print(eqn)
+    # eqn = solveEquation('x+2=2x+4')
+    # print(eqn)
+    #
+    # eqn = solveEquation('-6x-4=3x+x')
+    # print(eqn)
+    # eqn = solveEquation('2+4=2x+3')
+    # print(eqn)
+    # eqn = solveEquation('2+4=x+2x')
+    # print(eqn)
+
+    # eqn = predictSuccess(CURRENT_SKILLS, 'x=2')
+    # eqn = predictSuccess(CURRENT_SKILLS, '-3x=6')
+    # eqn = predictSuccess(CURRENT_SKILLS, '3x-2=-6')
+    skills = ['S4', 'S6', 'S9']
+    eqn = predictSuccess(skills, '3x+x=-6x-4')
     print(eqn)
-    eqn = solveEquation('-3x=6')
+    eqn = predictSuccess(skills, '2x+3=2+4')
     print(eqn)
-    eqn = solveEquation('3x-2=-6')
+    eqn = predictSuccess(skills, '2=x')
     print(eqn)
-    eqn = solveEquation('3x+x=-6x-4')
+    eqn = predictSuccess(skills, '6=-3x')
     print(eqn)
-    eqn = solveEquation('2x+3=2+4')
+    eqn = predictSuccess(skills, '-6=3x-2')
     print(eqn)
-    eqn = solveEquation('2=x')
+    eqn = predictSuccess(skills, 'x+2x=2+4')
     print(eqn)
-    eqn = solveEquation('6=-3x')
+    eqn = predictSuccess(skills, 'x+2=2x+4')
     print(eqn)
-    eqn = solveEquation('-6=3x-2')
+    eqn = predictSuccess(skills, '-6x-4=3x+x')
     print(eqn)
-    eqn = solveEquation('x+2x=2+4')
+    eqn = predictSuccess(skills, '2+4=2x+3')
     print(eqn)
-    eqn = solveEquation('x+2=2x+4')
-    print(eqn)
-    print('Going to take awhile')
-    eqn = solveEquation('-6x-4=3x+x')
-    print(eqn)
-    eqn = solveEquation('2+4=2x+3')
-    print(eqn)
-    eqn = solveEquation('2+4=x+2x')
+    eqn = predictSuccess(skills, '2+4=x+2x')
     print(eqn)
 
                                 

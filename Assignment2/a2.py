@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logic
 import planning
+import search
 from utils import (remove_all, unique, first, argmax, probability, isnumber,
                    issequence, Expr, expr, subexpressions, extend)
 
@@ -81,28 +82,76 @@ def giveFeedback(studentState):
 SAMPLE_EQUATION = '3x-2=6'
 SAMPLE_ACTION_PLAN = ['add 2', 'combine RHS constant terms', 'divide 3']
 
-def s1(coeff):
-    return "add " + str(coeff) + "x"
-def s2(coeff):
-    return "add -" + str(coeff) + "x"
-def s3(const):
-    return "add " + const
-def s4(const):
-    return "add -" + const
-def s5(const):
-    return "divide " + const
-def s6(const):
-    return "divide -" + const
-def s7():
-    return "combine RHS variable terms and get positive"
-def s8():
-    return "combine LHS variable terms and get positive"
-def s9():
-    return "combine LHS constant terms"
+action1 = planning.Action('CombineLeftConstants(a, b)',
+                            precond='LHC(a) & LHC(b)',
+                            effect='~LHC(b)')
+action2 = planning.Action('CombineRightConstants(a, b)',
+                            precond='RHC(a) & RHC(b)',
+                            effect='~RHC(a) & ~RHC(b) & RHC(-99999)')
+action3 = planning.Action('CombineLeftVariables(a, b)',
+                            precond='LHV(a) & LHV(b)',
+                            effect='~LHV(a) & ~LHV(b) & LHV(-99999)')
+action4 = planning.Action('CombineRightVariables(a, b)',
+                            precond='RHV(a) & RHV(b)',
+                            effect='~RHV(a)')
+action5 = planning.Action('AddVariable(b)',
+                            precond='RHV(b)',
+                            effect='~RHV(b) & LHV(b)')
+action6 = planning.Action('AddConstant(a)',
+                            precond='LHC(a)',
+                            effect='~LHC(a) & RHC(a)')
+action7 = planning.Action('Divide()',
+                            precond='LHV(-99999) & RHC(-99999)',
+                            effect='LHV(1) & ~LHV(-99999)')
 
 
 def solveEquation(equation):
-    plan = SAMPLE_ACTION_PLAN
+    sides = equation.split('=')     # Initial parsing of equation
+    for i in range(0, len(sides)):
+        minuslocs = reversed([pos for pos, char in enumerate(sides[i]) if char == '-'])
+        for loc in minuslocs:
+            if loc != 0:
+                sides[i] = sides[i][0:loc] + "+" + sides[i][loc:]
+    left = sides[0].split('+')
+    right = sides[1].split('+')
+
+    initial = ''  # Creating initial clauses
+    for term in left:
+        if term.find('x') != -1:
+            if term == 'x':
+                initial += 'LHV(1) & '
+            elif term == '-x':
+                initial += 'LHV(-1) & '
+            else:
+                initial += 'LHV(' + term[0:len(term) - 1] + ') & '
+        else:
+            initial += 'LHC(' + term + ') & '
+    for term in right:
+        if term.find('x') != -1:
+            if term == 'x':
+                initial += 'RHV(1) & '
+            elif term == '-x':
+                initial += 'RHV(-1) & '
+            else:
+                initial += 'RHV(' + term[0:len(term) - 1] + ') & '
+        else:
+            initial += 'RHC(' + term + ') & '
+    if initial.count('LHV') == 1 and initial.find('RHV') == -1:
+        initial += 'LHV(0) & '
+    if initial.count('RHC') == 1 and initial.find('LHC') == -1:
+        initial += 'RHC(0) & '
+    if initial.find('LHV') == -1:
+        initial += 'LHV(0) & '
+    if initial.find('RHC') == -1:
+        initial += 'RHC(0) & '
+    initial = initial[: len(initial) - 3]
+
+    goal = 'LHV(1) & RHC(-99999)'    # Specifiying goal state
+    actions = [action1, action2, action3, action4, action5, action6, action7]
+
+    problem = planning.PlanningProblem(initial, goal, actions)
+    forward_planning = planning.ForwardPlan(problem)
+    plan = search.astar_search(forward_planning)
     return plan
 
    
@@ -160,22 +209,14 @@ def stepThroughProblem(equation, action, current_skills):
 
 
 if __name__ == '__main__':
-    feedback = giveFeedback("CorrectAnswer")
-    print(feedback)
-    feedback = giveFeedback("~CorrectAnswer")
-    print(feedback)
-    feedback = giveFeedback("CorrectAnswer & IncorrectStreak")
-    print(feedback)
-    feedback = giveFeedback("CorrectAnswer & CorrectStreak")
-    print(feedback)
-    feedback = giveFeedback("~CorrectAnswer & MasteredSkill")
-    print(feedback)
-    feedback = giveFeedback("CorrectStreak & MasteredSkill")
-    print(feedback)
-    feedback = giveFeedback("IncorrectStreak")
-    print(feedback)
-    feedback = giveFeedback("CorrectStreak & CorrectAnswer & NewSkill")
-    print(feedback)
+    # feedback = giveFeedback("CorrectAnswer")
+    # print(feedback)
+    # eqn = solveEquation('x=2')
+    # eqn = solveEquation('-3x=6')
+    # eqn = solveEquation('3x-2=-6')
+    # eqn = solveEquation('3x+x=-6x-4')
+    eqn = solveEquation('4+3=6x-7x')
+    print('test')
                                 
                              
 

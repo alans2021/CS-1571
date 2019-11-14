@@ -575,7 +575,13 @@ class ForwardPlan(search.Problem):
         return associate('&', action(conjuncts(state), action.args).clauses)
 
     def goal_test(self, state):
-        return all(goal in conjuncts(state) for goal in self.planning_problem.goals)
+        if all(goal in conjuncts(state) for goal in self.planning_problem.goals):
+            negations = 0
+            for clause in conjuncts(state):
+                if str(clause).find('Not') != -1:
+                    negations += 1
+            if negations + len(self.planning_problem.goals) == len(conjuncts(state)):
+                return True
 
     def h(self, state):
         """

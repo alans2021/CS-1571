@@ -168,8 +168,9 @@ def solveEquation(equation):
 
 def parseActionPlan(action_plan, vars):
     interLeftC = 0
-    interRightC = 0
+    interLeftV = 0
     interRightV = 0
+    add = True
     for i in range(0, len(action_plan)):
         action = action_plan[i]
         if action.name == 'AddConstant':
@@ -181,11 +182,14 @@ def parseActionPlan(action_plan, vars):
             action_plan[i] = 'add ' + str(interRightC)
         elif action.name == 'AddVariable':
             if interRightV == 0:
-                interLeftV = -1 * action.args[0]
+                term = -1 * action.args[0]
+                interLeftV += term
+                add = False
             else:
-                interLeftV = -1 * interRightV
+                term = -1 * interRightV
+                interLeftV += term
             interRightV = 0
-            action_plan[i] = 'add ' + str(interLeftV) + 'x'
+            action_plan[i] = 'add ' + str(term) + 'x'
         elif action.name == 'CombineRightConstants':
             action_plan[i] = 'Combine RHS constants'
         elif action.name == 'CombineLeftConstants':
@@ -194,8 +198,22 @@ def parseActionPlan(action_plan, vars):
         elif action.name == 'CombineRightVariables':
             action_plan[i] = 'Combine RHS variables'
             interRightV += action.args[0] + action.args[1]
+            if interRightV > 0:
+                action_plan[i] += ' and get positive'
+            else:
+                action_plan[i] += ' and get negative'
         elif action.name == 'CombineLeftVariables':
             action_plan[i] = 'Combine LHS variables'
+            if action.args[0] != -sys.maxsize - 1 and add is True:
+                interLeftV += action.args[0]
+            if action.args[1] != -sys.maxsize - 1 and add is True:
+                interLeftV += action.args[1]
+
+            if interLeftV > 0:
+                action_plan[i] += ' and get positive'
+            else:
+                action_plan[i] += ' and get negative'
+            add = True
         else:
             left = [m.start() for m in re.finditer('LHV', vars)]
             right = [m.start() for m in re.finditer('RHV', vars)]
@@ -294,13 +312,13 @@ if __name__ == '__main__':
     print(eqn)
     eqn = solveEquation('x+2=2x+4')
     print(eqn)
-
-    # eqn = solveEquation('-6x-4=3x+x')
-    # print(eqn)
-    # eqn = solveEquation('2+4=2x+3')
-    # print(eqn)
-    # eqn = solveEquation('2+4=x+2x')
-    # print(eqn)
+    print('Going to take awhile')
+    eqn = solveEquation('-6x-4=3x+x')
+    print(eqn)
+    eqn = solveEquation('2+4=2x+3')
+    print(eqn)
+    eqn = solveEquation('2+4=x+2x')
+    print(eqn)
 
                                 
                              

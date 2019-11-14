@@ -106,7 +106,6 @@ action7 = planning.Action('Divide()',
                             precond='LHV({0}) & RHC({0})'.format(-sys.maxsize),
                             effect='LHV({1}) & ~LHV({0}) & RHC({1}) & ~RHC({0})'.format(-sys.maxsize, -sys.maxsize - 1))
 
-
 def solveEquation(equation):
     sides = equation.split('=')     # Initial parsing of equation
     for i in range(0, len(sides)):
@@ -142,9 +141,9 @@ def solveEquation(equation):
         initial += 'LHV(0) & '
     if initial.count('RHC') == 1 and initial.find('LHC') == -1:
         initial += 'RHC(0) & '
-    if initial.find('LHV') == -1:
+    if initial.find('LHV') == -1 and initial.count('RHV') != 2:
         initial += 'LHV(0) & '
-    if initial.find('RHC') == -1:
+    if initial.find('RHC') == -1 and initial.count('LHC') != 2:
         initial += 'RHC(0) & '
     initial = initial[: len(initial) - 3]
 
@@ -169,7 +168,6 @@ def solveEquation(equation):
 
 def parseActionPlan(action_plan, vars):
     interLeftC = 0
-    interLeftV = 0
     interRightC = 0
     interRightV = 0
     for i in range(0, len(action_plan)):
@@ -190,16 +188,14 @@ def parseActionPlan(action_plan, vars):
             action_plan[i] = 'add ' + str(interLeftV) + 'x'
         elif action.name == 'CombineRightConstants':
             action_plan[i] = 'Combine RHS constants'
-            interRightC += action.args[0] + action.args[1]
         elif action.name == 'CombineLeftConstants':
             action_plan[i] = 'Combine LHS constants'
             interLeftC += action.args[0] + action.args[1]
         elif action.name == 'CombineRightVariables':
-            action_plan[i] = 'Combine RHS constants'
+            action_plan[i] = 'Combine RHS variables'
             interRightV += action.args[0] + action.args[1]
         elif action.name == 'CombineLeftVariables':
-            action_plan[i] = 'Combine LHS constants'
-            interLeftV += action.args[0] + action.args[1]
+            action_plan[i] = 'Combine LHS variables'
         else:
             left = [m.start() for m in re.finditer('LHV', vars)]
             right = [m.start() for m in re.finditer('RHV', vars)]
@@ -278,31 +274,30 @@ def stepThroughProblem(equation, action, current_skills):
 if __name__ == '__main__':
     # feedback = giveFeedback("CorrectAnswer")
     # print(feedback)
-    # eqn = solveEquation('x=2')
-    # print(eqn)
-    # eqn = solveEquation('-3x=6')
-    # print(eqn)
-    # eqn = solveEquation('3x-2=-6')
-    # print(eqn)
-
+    eqn = solveEquation('x=2')
+    print(eqn)
+    eqn = solveEquation('-3x=6')
+    print(eqn)
+    eqn = solveEquation('3x-2=-6')
+    print(eqn)
     eqn = solveEquation('3x+x=-6x-4')
     print(eqn)
     eqn = solveEquation('2x+3=2+4')
     print(eqn)
+    eqn = solveEquation('2=x')
+    print(eqn)
+    eqn = solveEquation('6=-3x')
+    print(eqn)
+    eqn = solveEquation('-6=3x-2')
+    print(eqn)
+    eqn = solveEquation('x+2x=2+4')
+    print(eqn)
+    eqn = solveEquation('x+2=2x+4')
+    print(eqn)
 
-    # eqn = solveEquation('2=x')
-    # print(eqn)
-    # eqn = solveEquation('6=-3x')
-    # print(eqn)
-    # eqn = solveEquation('-6=3x-2')
-    # print(eqn)
     # eqn = solveEquation('-6x-4=3x+x')
     # print(eqn)
     # eqn = solveEquation('2+4=2x+3')
-    # print(eqn)
-    # eqn = solveEquation('x+2x=2+4')
-    # print(eqn)
-    # eqn = solveEquation('x+2=2x+4')
     # print(eqn)
     # eqn = solveEquation('2+4=x+2x')
     # print(eqn)

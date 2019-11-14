@@ -1,6 +1,6 @@
 """Planning (Chapters 10-11)
 """
-
+import sys
 import copy
 import itertools
 from collections import deque, defaultdict
@@ -58,6 +58,7 @@ class PlanningProblem:
                             kb.tell(expr(str(action.domain) + ' ==> ' + str(fests)))
 
         objects = set(arg for clause in set(self.initial + self.goals) for arg in clause.args)
+        objects.add(-sys.maxsize)
         fluent_list = []
         if name is not None:
             for fluent in self.initial + self.goals:
@@ -91,6 +92,7 @@ class PlanningProblem:
                     kb.tell(expr(str(action.domain) + ' ==> ' + str(action)))
 
         objects = set(arg for clause in self.initial for arg in clause.args)
+        objects.add(-sys.maxsize)
         expansions = []
         action_list = []
         if name is not None:

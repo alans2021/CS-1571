@@ -7,6 +7,53 @@ import search
 from utils import (remove_all, unique, first, argmax, probability, isnumber,
                    issequence, Expr, expr, subexpressions, extend)
 
+
+class Student:
+    def __init__(self):
+        self.state = []
+        self.cStreak = 0
+        self.iStreak = 0
+        self.correctSkill = 0
+
+    def answer(self, correct, newSkill):
+        if self.iStreak >= 3:
+            self.state.append('IncorrectStreak') if 'IncorrectStreak' not in self.state else self.state
+        else:
+            self.state.remove('IncorrectStreak') if 'IncorrectStreak' in self.state else self.state
+
+        if correct:
+            self.state.remove('~CorrectAnswer') if '~CorrectAnswer' in self.state else self.state
+            self.state.append('CorrectAnswer') if 'CorrectAnswer' not in self.state else self.state
+            self.cStreak += 1
+            self.correctSkill += 1
+            self.iStreak = 0
+        else:
+            self.state.remove('CorrectAnswer') if 'CorrectAnswer' in self.state else self.state
+            self.state.append('~CorrectAnswer') if '~CorrectAnswer' not in self.state else self.state
+            self.iStreak += 1
+            self.cStreak = 0
+            self.correctSkill = 0
+
+        if self.cStreak >= 3:
+            self.state.append('CorrectStreak') if 'CorrectStreak' not in self.state else self.state
+
+        if newSkill:
+            self.correctSkill = 0
+            self.state.append('NewSkill') if 'NewSkill' not in self.state else self.state
+            self.state.remove('MasteredSkill') if 'MasteredSkill' in self.state else self.state
+        else:
+            self.state.remove('NewSkill') if 'NewSkill' in self.state else self.state
+            if self.correctSkill >= 5:
+                self.state.append('MasteredSkill') if 'MasteredSkill' not in self.state else self.state
+
+    def __repr__(self):
+        string = ''
+        for clause in self.state:
+            string += clause
+            if clause != self.state[len(self.state) - 1]:
+                string += ' & '
+        return string
+
 """ A2 Part A
 
     giveFeedback is a function that reads in a student state and returns a feedback message using propositional logic and proof by resolution. The rules
@@ -191,19 +238,19 @@ def parseActionPlan(action_plan, vars):
             interRightV = 0
             action_plan[i] = 'add ' + str(term) + 'x'
         elif action.name == 'CombineRightConstants':
-            action_plan[i] = 'Combine RHS constants'
+            action_plan[i] = 'combine RHS constant terms'
         elif action.name == 'CombineLeftConstants':
-            action_plan[i] = 'Combine LHS constants'
+            action_plan[i] = 'combine LHS constant terms'
             interLeftC += action.args[0] + action.args[1]
         elif action.name == 'CombineRightVariables':
-            action_plan[i] = 'Combine RHS variables'
+            action_plan[i] = 'combine RHS variables'
             interRightV += action.args[0] + action.args[1]
             if interRightV > 0:
                 action_plan[i] += ' and get positive'
             else:
                 action_plan[i] += ' and get negative'
         elif action.name == 'CombineLeftVariables':
-            action_plan[i] = 'Combine LHS variables'
+            action_plan[i] = 'combine LHS variables'
             if action.args[0] != -sys.maxsize - 1 and add is True:
                 interLeftV += action.args[0]
             if action.args[1] != -sys.maxsize - 1 and add is True:
@@ -291,7 +338,7 @@ def getNeededSkills(plan, NeedKB):  # Add clauses to NeedKB
                     NeedKB.tell(expr('S2(' + p[len(p) - 2:len(p) - 1] + ')'))
                 else:
                     NeedKB.tell(expr('S1(' + p[len(p) - 2:len(p) - 1] + ')'))
-        elif p.find('Combine') != -1:
+        elif p.find('combine') != -1:
             if p.find('variable') != -1:
                 if p.find('positive') != -1:
                     NeedKB.tell(expr('S7(' + sidesDict[p[8:11]] + ')'))
@@ -322,21 +369,30 @@ def getNeededSkills(plan, NeedKB):  # Add clauses to NeedKB
     updated_skills: A list of skills students have after executing the action.
     
 """
-CURRENT_SKILLS = ['S8','S9']
+CURRENT_SKILLS = ['S8', 'S9', 'S6']
 EQUATION = '3x+2=8'
 ACTION = 'add -2'
-UPDATED_SKILLS = ['S8','S9','S4']
+UPDATED_SKILLS = ['S8', 'S9', 'S4']
+student = Student()
 
 
 def stepThroughProblem(equation, action, current_skills):
-    feedback_message = M1
-    updated_skills = UPDATED_SKILLS
-    return [feedback_message,updated_skills]
+    correct_actions = solveEquation(equation)
+    NeedKB = logic.FolKB()
+    getNeededSkills(correct_actions, NeedKB)
+    if correct_actions[0] == action:
+        if NeedKB.clauses[0].op not in current_skills:
+            student.answer(True, True)
+            current_skills.append(NeedKB.clauses[0].op)
+        else:
+            student.answer(True, False)
+    else:
+        student.answer(False, False)
+    feedback = giveFeedback(str(student))
+    return [feedback, current_skills]
 
 
 if __name__ == '__main__':
-    # feedback = giveFeedback("CorrectAnswer")
-    # print(feedback)
     # eqn = solveEquation('x=2')
     # print(eqn)
     # eqn = solveEquation('-3x=6')
@@ -357,39 +413,15 @@ if __name__ == '__main__':
     # print(eqn)
     # eqn = solveEquation('x+2=2x+4')
     # print(eqn)
-    #
+
     # eqn = solveEquation('-6x-4=3x+x')
     # print(eqn)
     # eqn = solveEquation('2+4=2x+3')
     # print(eqn)
     # eqn = solveEquation('2+4=x+2x')
     # print(eqn)
-
-    # eqn = predictSuccess(CURRENT_SKILLS, 'x=2')
-    # eqn = predictSuccess(CURRENT_SKILLS, '-3x=6')
-    # eqn = predictSuccess(CURRENT_SKILLS, '3x-2=-6')
-    skills = ['S4', 'S6', 'S9']
-    eqn = predictSuccess(skills, '3x+x=-6x-4')
-    print(eqn)
-    eqn = predictSuccess(skills, '2x+3=2+4')
-    print(eqn)
-    eqn = predictSuccess(skills, '2=x')
-    print(eqn)
-    eqn = predictSuccess(skills, '6=-3x')
-    print(eqn)
-    eqn = predictSuccess(skills, '-6=3x-2')
-    print(eqn)
-    eqn = predictSuccess(skills, 'x+2x=2+4')
-    print(eqn)
-    eqn = predictSuccess(skills, 'x+2=2x+4')
-    print(eqn)
-    eqn = predictSuccess(skills, '-6x-4=3x+x')
-    print(eqn)
-    eqn = predictSuccess(skills, '2+4=2x+3')
-    print(eqn)
-    eqn = predictSuccess(skills, '2+4=x+2x')
-    print(eqn)
-
-                                
+    output = stepThroughProblem('3x+2=8', 'add -2', CURRENT_SKILLS)
+    print(output[0])
+    print(output[1])
                              
 

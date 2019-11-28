@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7d068ac9-d338-4f95-bd5a-7d3417e4b5b4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Shen-cs1571-a1.py" beforeDir="false" afterPath="$PROJECT_DIR$/Shen-cs1571-a1.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Assignment3/a3.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CS1571 Introduction to AI - Assignment 2.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../CS1571 Introduction to AI - Assignment 2.docx" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,8 +16,8 @@
     <session id="556124299">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="20" />
-          <entry key="project.open.time.0" value="2" />
+          <entry key="project.closed" value="22" />
+          <entry key="project.open.time.0" value="4" />
           <entry key="project.open.time.1" value="2" />
           <entry key="project.open.time.11" value="1" />
           <entry key="project.open.time.39" value="1" />
@@ -24,20 +26,20 @@
           <entry key="project.open.time.7" value="7" />
           <entry key="project.open.time.8" value="2" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="21" />
+          <entry key="project.opened" value="23" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="partC-distances" value="1" />
-          <entry key="py" value="16" />
+          <entry key="py" value="18" />
           <entry key="txt" value="30" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="31" />
-          <entry key="Python" value="16" />
+          <entry key="Python" value="18" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -55,12 +57,56 @@
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Course-Schedule.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="2" selection-start-line="2" selection-end-line="2" />
+            <state relative-caret-position="289">
+              <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/search.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="552">
+              <caret line="874" column="88" lean-forward="true" selection-start-line="874" selection-start-column="88" selection-end-line="874" selection-end-column="88" />
+              <folding>
+                <element signature="e#221#402#0" expanded="true" />
+                <element signature="e#3009#5426#0" />
+                <element signature="e#5556#6695#0" />
+                <element signature="e#6855#7587#0" />
+                <element signature="e#7632#8345#0" />
+                <element signature="e#8391#9088#0" />
+                <element signature="e#9136#9764#0" />
+                <marker date="1570221797346" expanded="true" signature="10984:11845" ph="..." />
+                <marker date="1570221797346" expanded="true" signature="15807:16315" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/csp.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="161">
+              <caret line="1310" column="14" selection-start-line="1310" selection-start-column="14" selection-end-line="1310" selection-end-column="14" />
+              <folding>
+                <element signature="e#80#93#0" expanded="true" />
+                <element signature="e#6920#6932#0" />
+                <element signature="e#6965#7036#0" />
+                <element signature="e#7108#7577#0" />
+                <element signature="e#7619#7957#0" />
+                <element signature="e#8135#10001#0" />
+                <element signature="e#10036#11252#0" />
+                <element signature="e#11360#12958#0" />
+                <element signature="e#13143#13250#0" />
+                <marker date="1570078848030" expanded="true" signature="13508:14424" ph="..." />
+                <marker date="1570078848030" expanded="true" signature="14451:14456" ph="..." />
+                <marker date="1570078848030" expanded="true" signature="14451:14655" ph="..." />
+                <marker date="1570078848030" expanded="true" signature="15244:15786" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -76,9 +122,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>lange</find>
-      <find>chrysanthis</find>
-      <find>argmin</find>
       <find>backtracking</find>
       <find>courses</find>
       <find>goal_test</find>
@@ -106,6 +149,9 @@
       <find>best_firs</find>
       <find>iterative</find>
       <find>course</find>
+      <find>super</find>
+      <find>Problem</find>
+      <find>notIm</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -541,13 +587,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Course-Schedule.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/csp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="988" column="12" selection-start-line="988" selection-start-column="12" selection-end-line="988" selection-end-column="12" />
+        <state relative-caret-position="161">
+          <caret line="1310" column="14" selection-start-line="1310" selection-start-column="14" selection-end-line="1310" selection-end-column="14" />
           <folding>
             <element signature="e#80#93#0" expanded="true" />
-            <element signature="e#405#6761#0" />
             <element signature="e#6920#6932#0" />
             <element signature="e#6965#7036#0" />
             <element signature="e#7108#7577#0" />
@@ -566,11 +618,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/search.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="293">
-          <caret line="292" selection-start-line="292" selection-end-line="292" />
+        <state relative-caret-position="552">
+          <caret line="874" column="88" lean-forward="true" selection-start-line="874" selection-start-column="88" selection-end-line="874" selection-end-column="88" />
           <folding>
             <element signature="e#221#402#0" expanded="true" />
-            <element signature="e#680#2908#0" />
             <element signature="e#3009#5426#0" />
             <element signature="e#5556#6695#0" />
             <element signature="e#6855#7587#0" />
@@ -580,13 +631,6 @@
             <marker date="1570221797346" expanded="true" signature="10984:11845" ph="..." />
             <marker date="1570221797346" expanded="true" signature="15807:16315" ph="..." />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Course-Schedule.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>

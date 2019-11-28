@@ -1,10 +1,13 @@
 from tree import Utility
 from tree import Choice
 from tree import Decision
+from probability import BayesNet
+from probability import enumeration_ask
 
 
 # First create all nodes with connections and probabilities. Then find the value of first decision node
-def q1():
+# Does expectimax algorithm do determine action that D1 node should take
+def q2():
 
     # Create all utility nodes first
     U1 = Utility(.1, 100, 'Resolved')
@@ -44,6 +47,39 @@ def q1():
     return 'Value for D1 is ' + str(D1.value()) + ' and ' + 'Action from D1 is ' + D1.action
 
 
+def q6(variable, conditions, value):
+    T, F = True, False
+    chatbot = BayesNet([
+        ('Accurate', '', 0.9),
+        ('ProblemSize', '', 0.9),   # 0.9 is probabililty that problem size is small
+        ('ConversationLength', 'ProblemSize', {T: (0.40, 0.40, 0.20), F: (0.20, 0.30, 0.50)}, 3),
+        ('Frustrated', 'Accurate ProblemSize ConversationLength',
+         {(T, T, 0): 0.20, (T, T, 1): 0.30, (T, T, 2): 0.60,
+          (T, F, 0): 0.30, (T, F, 1): 0.60, (T, F, 2): 0.70,
+          (F, T, 0): 0.40, (F, T, 1): 0.50, (F, T, 2): 0.80,
+          (F, F, 0): 0.50, (F, F, 1): 0.80, (F, F, 2): 0.90}),
+        ('Resolved', 'Accurate ConversationLength',
+         {(T, 0): 0.30, (T, 1): 0.50, (T, 2): 0.70,
+          (F, 0): 0.20, (F, 1): 0.30, (F, 2): 0.40})
+    ])
+
+    probdist = enumeration_ask(variable, conditions, chatbot)
+
+    psize_dict = {True: 'Small', False: 'Big'}
+    clength_dict = {0: 'Short', 1: 'Medium', 2: 'Long'}
+    for var in conditions:
+        if var == 'ProblemSize':
+            conditions[var] = psize_dict[conditions[var]]
+        if var == 'ConversationLength':
+            conditions[var] = clength_dict[conditions[var]]
+
+    return 'Probability of ' + variable + ' being ' + str(value) + ' given ' + \
+           str(conditions) + ': ' + str(probdist.prob[value])
+
+
 if __name__ == '__main__':
-    answer = q1()
+    answer = q2()
     print(answer)
+
+    a = q6('Resolved', dict(), True)
+    print(a)

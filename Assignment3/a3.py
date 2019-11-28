@@ -81,5 +81,5 @@ if __name__ == '__main__':
     answer = q2()
     print(answer)
 
-    a = q6('Resolved', dict(), True)
+    a = q6('ConversationLength', dict(ProblemSize=True), 0)
     print(a)

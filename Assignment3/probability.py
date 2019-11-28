@@ -201,6 +201,8 @@ class BayesNet:
 
     def variable_values(self, var):
         """Return the domain of var."""
+        if var == 'ConversationLength':
+            return [0, 1, 2]
         return [True, False]
 
     def __repr__(self):
